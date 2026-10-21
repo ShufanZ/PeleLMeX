@@ -1561,7 +1561,7 @@ PeleLM::initLevelDataFromPlt(int a_lev, const std::string& a_dataPltFile)
 
       // Get enthalpy
       amrex::Real h_cgs = 0.0;
-      eos.TY2H(temp(i, j, k), massfrac, h_cgs);
+      eos.RTY2H(rho_cgs, temp(i, j, k), massfrac, h_cgs);
       rhoH(i, j, k) = c2m::H(h_cgs) * rho(i, j, k);
 
       // Fill rhoYs

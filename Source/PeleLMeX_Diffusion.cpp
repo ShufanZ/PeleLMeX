@@ -736,7 +736,12 @@ PeleLM::computeDifferentialDiffusionFluxes(
   }
 
   // Differential diffusion term: \sum_k ( h_k * \Flux_k )
-  computeSpeciesEnthalpyFlux(a_fluxes, GetVecOfConstPtrs(getTempVect(a_time)));
+  computeSpeciesEnthalpyFlux(
+    a_fluxes, 
+    GetVecOfConstPtrs(getDensityVect(a_time)), 
+    GetVecOfConstPtrs(getTempVect(a_time)), 
+    GetVecOfConstPtrs(getSpeciesVect(a_time))
+  );
   //----------------------------------------------------------------
 
   //----------------------------------------------------------------
@@ -1090,9 +1095,13 @@ PeleLM::addSoretTerm(
 }
 
 void
-PeleLM::computeSpeciesEnthalpyFlux(
+PeleLM::computeSpeciesEnthalpyFlux
+(
   const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>& a_fluxes,
-  amrex::Vector<amrex::MultiFab const*> const& a_temp)
+  amrex::Vector<amrex::MultiFab const*> const& a_rho,
+  amrex::Vector<amrex::MultiFab const*> const& a_temp,
+  amrex::Vector<amrex::MultiFab const*> const& a_spec
+)
 {
 
   BL_PROFILE("PeleLMeX::computeSpeciesEnthalpyFlux()");
@@ -1118,7 +1127,9 @@ PeleLM::computeSpeciesEnthalpyFlux(
     for (amrex::MFIter mfi(Enth, amrex::TilingIfNotGPU()); mfi.isValid();
          ++mfi) {
       const amrex::Box& gbx = mfi.growntilebox();
+      auto const& rho_arr  = a_rho[lev]->const_array(mfi);
       auto const& Temp_arr = a_temp[lev]->const_array(mfi);
+      auto const& rhoY_arr = a_spec[lev]->const_array(mfi);
       auto const& Hi_arr = Enth.array(mfi);
 
 #ifdef AMREX_USE_EB
@@ -1133,21 +1144,21 @@ PeleLM::computeSpeciesEnthalpyFlux(
         flagfab.getType(gbx) != amrex::FabType::regular) { // EB containing
                                                            // boxes
         amrex::ParallelFor(
-          gbx, [Hi_arr, flag, Temp_arr,
+          gbx, [Hi_arr, flag, rho_arr, rhoY_arr, Temp_arr,
                 leosparm] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
             if (flag(i, j, k).isCovered()) {
               Hi_arr(i, j, k) = 0.0;
             } else {
-              getHGivenT(i, j, k, Temp_arr, Hi_arr, leosparm);
+              getHGivenRTY(i, j, k, rho_arr, Temp_arr, rhoY_arr, Hi_arr, leosparm);
             }
           });
       } else
 #endif
       {
         amrex::ParallelFor(
-          gbx, [Temp_arr, Hi_arr,
+          gbx, [rho_arr, rhoY_arr, Temp_arr, Hi_arr,
                 leosparm] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-            getHGivenT(i, j, k, Temp_arr, Hi_arr, leosparm);
+            getHGivenRTY(i, j, k, rho_arr, Temp_arr, rhoY_arr, Hi_arr, leosparm);
           });
       }
     }
@@ -1611,8 +1622,15 @@ PeleLM::differentialDiffusionUpdate(
     }
 
     // Differential diffusion term: \sum_k ( h_k * \Flux_k )
-    computeSpeciesEnthalpyFlux(
-      GetVecOfArrOfPtrs(fluxes), GetVecOfConstPtrs(getTempVect(AmrNewTime)));
+   // computeSpeciesEnthalpyFlux(
+   //   GetVecOfArrOfPtrs(fluxes), GetVecOfConstPtrs(getTempVect(AmrNewTime)));
+      computeSpeciesEnthalpyFlux(
+        GetVecOfArrOfPtrs(fluxes), 
+        GetVecOfConstPtrs(getDensityVect(AmrNewTime)), 
+        GetVecOfConstPtrs(getTempVect(AmrNewTime)), 
+        GetVecOfConstPtrs(getSpeciesVect(AmrNewTime))
+      );
+
 
     // average_down enthalpy fluxes
     getDiffusionOp()->avgDownFluxes(GetVecOfArrOfPtrs(fluxes), NUM_SPECIES, 2);
@@ -1899,9 +1917,15 @@ PeleLM::deltaTIter_update(
   }
 
   // Differential diffusion term: \sum_k ( h_k * \Flux_k )
-  computeSpeciesEnthalpyFlux(
-    a_fluxes, GetVecOfConstPtrs(getTempVect(AmrNewTime)));
-
+  //computeSpeciesEnthalpyFlux(
+  //  a_fluxes, GetVecOfConstPtrs(getTempVect(AmrNewTime)));
+    computeSpeciesEnthalpyFlux(
+      a_fluxes, 
+      GetVecOfConstPtrs(getDensityVect(AmrNewTime)), 
+      GetVecOfConstPtrs(getTempVect(AmrNewTime)), 
+      GetVecOfConstPtrs(getSpeciesVect(AmrNewTime))
+    );
+  
   // average_down enthalpy fluxes
   getDiffusionOp()->avgDownFluxes(a_fluxes, NUM_SPECIES, 2);
 

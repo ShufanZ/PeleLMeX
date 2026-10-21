@@ -518,7 +518,10 @@ PeleLM::getHeatRelease(const int a_lev, amrex::MultiFab* a_HR)
     *a_HR, [state_n_ma, enth_ma, leosparm, HRR_ma, react_ma] AMREX_GPU_DEVICE(
              int box_no, int i, int j, int k) noexcept {
       amrex::Array4<amrex::Real const> T(state_n_ma[box_no], TEMP);
-      getHGivenT(i, j, k, T, enth_ma[box_no], leosparm);
+      amrex::Array4<amrex::Real const> rho(state_n_ma[box_no], DENSITY);
+      amrex::Array4<amrex::Real const> rhoY(state_n_ma[box_no], FIRSTSPEC);
+
+      getHGivenRTY(i, j, k, rho, T, rhoY, enth_ma[box_no], leosparm);
       HRR_ma[box_no](i, j, k) = 0.0;
       for (int n = 0; n < NUM_SPECIES; ++n) {
         HRR_ma[box_no](i, j, k) -=
