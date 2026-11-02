@@ -49,7 +49,7 @@ amr.max_step = 10
 amr.dt_shrink = 0.01
 amr.stop_time = 1.0
 #amr.stop_time = 1.00
-amr.cfl = 0.15
+amr.cfl = 0.85
 amr.derive_plot_vars = avg_pressure mag_vort mass_fractions
 
 # --------------- INPUTS TO CHEMISTRY REACTOR ---------------
@@ -57,7 +57,8 @@ peleLM.chem_integrator = "ReactorCvode"
 peleLM.use_typ_vals_chem = 1          # Use species/temp typical values in CVODE
 ode.rtol = 1.0e-6                     # Relative tolerance of the chemical solve
 ode.atol = 1.0e-5                     # Absolute tolerance factor applied on typical values
-cvode.solve_type = denseAJ_direct     # CVODE Linear solve type (for Newton direction)
+#cvode.solve_type = denseAJ_direct     # CVODE Linear solve type (for Newton direction)
+cvode.solve_type = GMRES 
 cvode.max_order  = 4                  # CVODE max BDF order.
 
 #--------------------REFINEMENT CONTROL------------------------

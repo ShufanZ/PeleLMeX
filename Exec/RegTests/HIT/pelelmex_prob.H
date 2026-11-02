@@ -230,7 +230,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
       eos.PYT2R(P_cgs, Yt, state(i, j, k, TEMP), rho_cgs);
       state(i, j, k, DENSITY) = c2m::Rho(rho_cgs);
 
-      eos.TY2H(state(i, j, k, TEMP), Yt, state(i, j, k, RHOH));
+      eos.RTY2H(rho_cgs, state(i, j, k, TEMP), Yt, state(i, j, k, RHOH));
       state(i, j, k, RHOH) =
         state(i, j, k, DENSITY) * c2m::H(state(i, j, k, RHOH));
 

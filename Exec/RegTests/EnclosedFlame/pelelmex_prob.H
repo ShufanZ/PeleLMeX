@@ -122,7 +122,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
 
     // Enthalpy
     amrex::Real h_cgs = 0.0;
-    eos.TY2H(state(i, j, k, TEMP), massfrac, h_cgs);
+    eos.RTY2H(rho_cgs,state(i, j, k, TEMP), massfrac, h_cgs);
     state(i, j, k, RHOH) = h_cgs * 1.0e-4 * state(i, j, k, DENSITY);
 
     // Species mass

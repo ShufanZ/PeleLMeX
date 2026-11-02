@@ -81,7 +81,7 @@ pelelmex_derheatrelease(
   amrex::ParallelFor(
     bx, [rho, temp, rhoY, Hi, leosparm, HRR,
          react] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-      getHGivenT(i, j, k, rho, temp, rhoY, Hi, leosparm);
+      getHGivenRTY(i, j, k, rho, temp, rhoY, Hi, leosparm);
       HRR(i, j, k) = 0.0;
       for (int n = 0; n < NUM_SPECIES; ++n) {
         HRR(i, j, k) -= Hi(i, j, k, n) * react(i, j, k, n);

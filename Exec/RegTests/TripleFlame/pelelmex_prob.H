@@ -126,7 +126,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
     eos.PYT2R(P_cgs, massfrac, state(i, j, k, TEMP), rho_cgs);
     state(i, j, k, DENSITY) = rho_cgs * 1.0e3; // CGS -> MKS conversion
 
-    eos.TY2H(state(i, j, k, TEMP), massfrac, state(i, j, k, RHOH));
+    eos.RTY2H(rho_cgs, state(i, j, k, TEMP), massfrac, state(i, j, k, RHOH));
     state(i, j, k, RHOH) *=
       1.0e-4 * state(i, j, k, DENSITY); // CGS -> MKS conversion
 
@@ -191,7 +191,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
       eos.PYT2R(P_cgs, massfrac, s_ext[TEMP], rho_cgs);
       s_ext[DENSITY] = rho_cgs * 1.0e3;
 
-      eos.TY2H(s_ext[TEMP], massfrac, RhoH_temp);
+      eos.RTY2H(rho_cgs, s_ext[TEMP], massfrac, RhoH_temp);
       s_ext[RHOH] =
         RhoH_temp * 1.0e-4 * s_ext[DENSITY]; // CGS -> MKS conversion
 
