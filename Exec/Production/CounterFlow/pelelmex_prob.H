@@ -137,7 +137,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
 
     // Enthalpy
     amrex::Real h_cgs = 0.0;
-    eos.TY2H(state(i, j, k, TEMP), massfrac, h_cgs);
+    eos.RTY2H(rho_cgs,state(i, j, k, TEMP), massfrac, h_cgs);
     state(i, j, k, RHOH) = h_cgs * 1.0e-4 * state(i, j, k, DENSITY);
 
     // Species mass
@@ -221,7 +221,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
       eos.PYT2R(P_cgs, massfrac_mix, s_ext[TEMP], rho_cgs);
       s_ext[DENSITY] = rho_cgs * 1.0e3;
 
-      eos.TY2H(s_ext[TEMP], massfrac_mix, RhoH_temp);
+      eos.RTY2H(rho_cgs, s_ext[TEMP], massfrac_mix, RhoH_temp);
       s_ext[RHOH] = RhoH_temp * 1.0e-4 * s_ext[DENSITY];
 
       for (int n = 0; n < NUM_SPECIES; n++) {
@@ -237,7 +237,7 @@ struct MyProblemSpecificFunctions : public DefaultProblemSpecificFunctions
       eos.PYT2R(P_cgs, massfrac_mix, s_ext[TEMP], rho_cgs);
       s_ext[DENSITY] = rho_cgs * 1.0e3;
 
-      eos.TY2H(s_ext[TEMP], massfrac_mix, RhoH_temp);
+      eos.RTY2H(rho_cgs,s_ext[TEMP], massfrac_mix, RhoH_temp);
       s_ext[RHOH] = RhoH_temp * 1.0e-4 * s_ext[DENSITY];
 
       for (int n = 0; n < NUM_SPECIES; n++) {

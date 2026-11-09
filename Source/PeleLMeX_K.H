@@ -1073,10 +1073,12 @@ buildDiffusionForcing(
   amrex::Array4<amrex::Real> const& forceY,
   amrex::Array4<amrex::Real> const& forceT,
   amrex::Array4<const amrex::Real> const& dwbar,
+  amrex::Array4<const amrex::Real> const& dfug,
   amrex::Array4<const amrex::Real> const& dT,
   amrex::Array4<const amrex::Real> const& extRhoY,
   amrex::Array4<const amrex::Real> const& extRhoH,
   const int use_wbar,
+  const int use_fugacity,
   const int use_soret,
   amrex::Array4<amrex::Real> const& forceAux,
   amrex::Array4<const amrex::Real> const& a_aux,
@@ -1095,6 +1097,9 @@ buildDiffusionForcing(
     }
     if (use_wbar != 0) {
       forceY(i, j, k, n) += dwbar(i, j, k, n);
+    }
+    if (use_fugacity != 0) {
+      forceY(i, j, k, n) += dfug(i, j, k, n);
     }
     if (use_soret != 0) {
       forceY(i, j, k, n) += dT(i, j, k, n);
@@ -1213,9 +1218,7 @@ est_divu_dt_2(
   const int k,
   const amrex::Real dtfactor,
   const amrex::Real rhomin,
-  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv_uniform,
-  MeshMapEvaluator const& mmap,
-  amrex::GeometryData const& gd,
+  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv,
   amrex::Array4<const amrex::Real> const& rho,
   amrex::Array4<const amrex::Real> const& vel,
   amrex::Array4<const amrex::Real> const& divu) noexcept
@@ -1223,8 +1226,6 @@ est_divu_dt_2(
   amrex::Real dtcell = 1.0e20;
   amrex::Real denom = 0.0;
   const bool rho_is_okay = (rho(i, j, k) > rhomin);
-
-  const auto dxinv = mapped_inv_dx_array(i, j, k, dxinv_uniform, mmap, gd);
 
   denom =
     rho(i, j, k) * divu(i, j, k) +
@@ -1250,9 +1251,7 @@ check_divu_dt(
   const int check_type,
   const amrex::Real dtfactor,
   const amrex::Real rhomin,
-  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv_uniform,
-  MeshMapEvaluator const& mmap,
-  amrex::GeometryData const& gd,
+  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv,
   amrex::Array4<const amrex::Real> const& rho,
   amrex::Array4<const amrex::Real> const& vel,
   amrex::Array4<const amrex::Real> const& divu,
@@ -1261,7 +1260,6 @@ check_divu_dt(
   amrex::Real dtcell = 1.0e12;
   amrex::Real denom = 0.0;
   const bool rho_is_okay = (rho(i, j, k) > rhomin);
-  const auto dxinv = mapped_inv_dx_array(i, j, k, dxinv_uniform, mmap, gd);
 
   if (check_type == 1) { // Check based on divU
     if (divu(i, j, k) > 0.0) {
@@ -1317,6 +1315,7 @@ getGammaInv(
   amrex::Real cvmix = 0.0;
   eos.RTY2Cv(rho_cgs, T(i, j, k), y, cvmix);
   */
+  // aware: Gamma = gamma * rho / p * dpdrho \neq gamma for real gas
 
   amrex::Real pmix = 0.0;
   eos.RTY2P(rho_cgs, T(i, j, k), y, pmix);

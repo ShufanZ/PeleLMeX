@@ -652,6 +652,18 @@ PeleLM::readParameters()
   amrex::ParmParse pptrans("transport");
   pptrans.query("use_soret", m_use_soret);
   pp.query("use_wbar", m_use_wbar);
+  // Real-gas non-linear differential diffusion, important near critical point
+  // for flow with CO2/H2O 
+  if (pele::physics::PhysicsType::eos_type::identifier() == "SRK") {
+    m_use_fugacity = 1;
+  }
+  pp.query("use_fugacity", m_use_fugacity);
+  if (m_use_fugacity != 0 &&
+      pele::physics::PhysicsType::eos_type::identifier() != "SRK") {
+    m_use_fugacity = 0;
+    amrex::Print()
+      << "WARNING: use_fugacity set to false because the EOS is not SRK\n";
+  }
   if (m_use_soret != 0) {
     bool isothermal = false;
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
@@ -664,6 +676,8 @@ PeleLM::readParameters()
     if (isothermal) {
       m_soret_boundary_override = 1;
       m_use_wbar = 0;
+      //do we need this?
+      //m_use_fugacity = 0;
 #if PELE_USE_PLASMA
       amrex::Abort("Isothermal walls with Soret incompatible with plasma");
 #endif
@@ -699,11 +713,12 @@ PeleLM::readParameters()
     }
   }
   if (
-    (m_use_wbar != 0 || m_use_soret != 0) &&
+    (m_use_wbar != 0 || m_use_fugacity != 0|| m_use_soret != 0) &&
     (m_fixed_Le != 0 || m_fixed_Pr != 0)) {
     m_use_wbar = 0;
     m_use_soret = 0;
-    amrex::Print() << "WARNING: use_wbar and use_soret set to false because "
+    m_use_fugacity = 0;
+    amrex::Print() << "WARNING: use_wbar, use_fugacity and use_soret set to false because "
                       "fixed_Pr or fixed_Le is true \n";
   }
 
@@ -1042,6 +1057,9 @@ PeleLM::checkSetupParams()
     }
     if (m_use_wbar != 0) {
       amrex::Abort("Use of Wbar fluxes is not compatible with Manifold EOS");
+    }
+    if (m_use_fugacity != 0) {
+      amrex::Abort("Use of fugacity fluxes is not compatible with Manifold EOS");
     }
 #ifdef PELE_USE_RADIATION
     if (do_rad_solve) {

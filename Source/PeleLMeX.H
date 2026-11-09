@@ -253,6 +253,7 @@ public:
         factory,
       const int a_nGrowAdv,
       const int a_use_wbar,
+      const int a_use_fugacity,
       const int a_use_soret,
       const int a_nAux,
       const int is_init = 0);
@@ -269,9 +270,14 @@ public:
     amrex::Vector<amrex::MultiFab> Dwbar; // Diffusion term of Wbar
     amrex::Vector<amrex::Array<amrex::MultiFab, AMREX_SPACEDIM>>
       wbar_fluxes;                     // Wbar flux correction
+    amrex::Vector<amrex::MultiFab> Dfug; //fugacity-induced diffusion
+    amrex::Vector<amrex::Array<amrex::MultiFab, AMREX_SPACEDIM>> 
+      fug_fluxes;   // Fugacity-induced flux correction Xgrad(ln phi)
     amrex::Vector<amrex::MultiFab> DT; // Diffusion term of T (soret flux)
     amrex::Vector<amrex::Array<amrex::MultiFab, AMREX_SPACEDIM>>
       soret_fluxes; // Soret flux correction
+    
+
   };
   /**
    * \brief Advance function data container for advection term
@@ -620,6 +626,8 @@ public:
     const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
       a_wbarfluxes,
     const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
+      a_fugfluxes,
+    const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
       a_soretfluxes,
     const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
       a_auxfluxes);
@@ -665,6 +673,27 @@ public:
     amrex::Vector<amrex::MultiFab const*> const& a_rho,
     amrex::Vector<amrex::MultiFab const*> const& a_beta,
     amrex::Vector<amrex::MultiFab const*> const& a_boundary);
+  /**
+   * \brief Add the fugacity off-diagonal contribution to the face-centered 
+   *  species diffusion fluxes on all levels optionally returning that 
+   *  contribution in a separate container. Only works when EOS is not ideal gas.
+   * \param a_spfluxes diffusion fluxes to be updated
+   * \param a_spfugfluxes optional container to return the fugacity contribution
+   * \param a_spec species rhoYs state data on all levels
+   * \param a_rho density state data on all levels
+   * \param a_rho temperature state data on all levels
+   * \param a_beta cell-centered species diffusivity on all levels
+   */
+  template <typename EOSType> 
+  void addFugacityTerm(
+    const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
+      a_spfluxes,
+    const amrex::Vector<amrex::Array<amrex::MultiFab*, AMREX_SPACEDIM>>&
+      a_spfugfluxes,
+    amrex::Vector<amrex::MultiFab const*> const& a_spec,
+    amrex::Vector<amrex::MultiFab const*> const& a_rho,
+    amrex::Vector<amrex::MultiFab const*> const& a_temp,
+    amrex::Vector<amrex::MultiFab const*> const& a_beta);
 
   /**
    * \brief Add the Soret contribution to the face-centered species diffusion
@@ -2357,6 +2386,11 @@ public:
 
   int m_use_wbar = 1;
   int m_use_soret = 0;
+#ifdef USE_SRK_EOS  
+  int m_use_fugacity = 1;
+#else
+  int m_use_fugacity = 0;
+#endif
   int m_soret_boundary_override = 0;
   // LES Model
   bool m_do_les = false;

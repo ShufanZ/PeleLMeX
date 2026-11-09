@@ -68,8 +68,8 @@ PeleLM::Advance(const int is_initIter)
   // Data for the advance, only live for the duration of the advance
   std::unique_ptr<AdvanceDiffData> diffData;
   diffData = std::make_unique<AdvanceDiffData>(
-    finest_level, grids, dmap, m_factory, m_nGrowAdv, m_use_wbar, m_use_soret,
-    m_nAux);
+    finest_level, grids, dmap, m_factory, m_nGrowAdv, m_use_wbar, m_use_fugacity,
+    m_use_soret, m_nAux);
   std::unique_ptr<AdvanceAdvData> advData;
   advData = std::make_unique<AdvanceAdvData>(
     finest_level, grids, dmap, m_factory, m_incompressible, m_nAux, m_nGrowAdv,

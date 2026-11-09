@@ -98,6 +98,7 @@ PeleLM::AdvanceDiffData::AdvanceDiffData(
     factory,
   const int nGrowAdv,
   const int a_use_wbar,
+  const int a_use_fugacity,
   const int a_use_soret,
   const int a_nAux,
   const int is_init)
@@ -131,6 +132,10 @@ PeleLM::AdvanceDiffData::AdvanceDiffData(
       Dwbar.reserve(a_finestLevel + 1);
       wbar_fluxes.resize(a_finestLevel + 1);
     }
+    if (a_use_fugacity != 0) {
+      Dfug.reserve(a_finestLevel + 1);
+      fug_fluxes.resize(a_finestLevel + 1);
+    }
     if (a_use_soret != 0) {
       DT.reserve(a_finestLevel + 1);
       soret_fluxes.resize(a_finestLevel + 1);
@@ -155,6 +160,17 @@ PeleLM::AdvanceDiffData::AdvanceDiffData(
           const amrex::BoxArray& faceba =
             amrex::convert(ba[lev], amrex::IntVect::TheDimensionVector(idim));
           wbar_fluxes[lev][idim].define(
+            faceba, dm[lev], NUM_SPECIES, 0, amrex::MFInfo(), *factory[lev]);
+        }
+      }
+      if (a_use_fugacity != 0) {
+        Dfug.emplace_back(
+          ba[lev], dm[lev], NUM_SPECIES, nGrowAdv, amrex::MFInfo(),
+          *factory[lev]);
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
+          const amrex::BoxArray& faceba =
+            amrex::convert(ba[lev], amrex::IntVect::TheDimensionVector(idim));
+          fug_fluxes[lev][idim].define(
             faceba, dm[lev], NUM_SPECIES, 0, amrex::MFInfo(), *factory[lev]);
         }
       }

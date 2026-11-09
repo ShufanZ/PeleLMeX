@@ -73,7 +73,7 @@ peleLM.mixtureFraction.type   = mass
 peleLM.mixtureFraction.oxidTank = O2:0.233 N2:0.767
 peleLM.mixtureFraction.fuelTank = NC12H26:1.0
 
-peleLM.chem_integrator = "ReactorCvode"
+peleLM.chem_integrator = "ReactorNull"
 peleLM.use_typ_vals_chem = 1          # Use species/temp typical values in CVODE
 ode.rtol = 1.0e-6                     # Relative tolerance of the chemical solve
 ode.atol = 1.0e-5                     # Absolute tolerance factor applied on typical values

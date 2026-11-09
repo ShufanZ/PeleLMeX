@@ -30,7 +30,7 @@ USE_PLASMA = FALSE
 
 # PelePhysics
 Chemistry_Model = dodecane_lu
-Eos_Model = Fuego
+Eos_Model = Soave-Redlich-Kwong
 Transport_Model = Simple
 
 PELE_HOME ?= ../../..

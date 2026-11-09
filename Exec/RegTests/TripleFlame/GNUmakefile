@@ -30,8 +30,8 @@ USE_PLASMA = FALSE
 
 # PelePhysics
 Chemistry_Model = drm19
-#Eos_Model = Soave-Redlich-Kwong
-Eos_Model = Fuego
+Eos_Model = Soave-Redlich-Kwong
+#Eos_Model = Fuego
 Transport_Model = Simple
 
 PELE_HOME ?= ../../..
