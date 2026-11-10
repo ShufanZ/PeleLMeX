@@ -15,7 +15,7 @@ USE_GPROF = FALSE
 
 # Performance
 USE_MPI = TRUE
-USE_OMP = FALSE
+USE_OMP = TRUE
 USE_CUDA = FALSE
 USE_HIP = FALSE
 USE_SYCL = FALSE
@@ -30,8 +30,8 @@ USE_PLASMA = FALSE
 
 # PelePhysics
 Chemistry_Model = drm19
-Eos_Model = Soave-Redlich-Kwong
-#Eos_Model = Fuego
+#Eos_Model = Soave-Redlich-Kwong
+Eos_Model = Fuego
 Transport_Model = Simple
 
 PELE_HOME ?= ../../..
