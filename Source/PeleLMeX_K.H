@@ -1218,7 +1218,9 @@ est_divu_dt_2(
   const int k,
   const amrex::Real dtfactor,
   const amrex::Real rhomin,
-  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv,
+  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv_uniform,
+  MeshMapEvaluator const& mmap,
+  amrex::GeometryData const& gd,
   amrex::Array4<const amrex::Real> const& rho,
   amrex::Array4<const amrex::Real> const& vel,
   amrex::Array4<const amrex::Real> const& divu) noexcept
@@ -1226,6 +1228,8 @@ est_divu_dt_2(
   amrex::Real dtcell = 1.0e20;
   amrex::Real denom = 0.0;
   const bool rho_is_okay = (rho(i, j, k) > rhomin);
+
+  const auto dxinv = mapped_inv_dx_array(i, j, k, dxinv_uniform, mmap, gd);
 
   denom =
     rho(i, j, k) * divu(i, j, k) +
@@ -1251,7 +1255,9 @@ check_divu_dt(
   const int check_type,
   const amrex::Real dtfactor,
   const amrex::Real rhomin,
-  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv,
+  amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dxinv_uniform,
+  MeshMapEvaluator const& mmap,
+  amrex::GeometryData const& gd,
   amrex::Array4<const amrex::Real> const& rho,
   amrex::Array4<const amrex::Real> const& vel,
   amrex::Array4<const amrex::Real> const& divu,
@@ -1260,6 +1266,8 @@ check_divu_dt(
   amrex::Real dtcell = 1.0e12;
   amrex::Real denom = 0.0;
   const bool rho_is_okay = (rho(i, j, k) > rhomin);
+
+  const auto dxinv = mapped_inv_dx_array(i, j, k, dxinv_uniform, mmap, gd);
 
   if (check_type == 1) { // Check based on divU
     if (divu(i, j, k) > 0.0) {
